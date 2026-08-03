@@ -6,7 +6,7 @@ import { Outlet } from 'react-router-dom'
  */
 export default function PlainLayout() {
   return (
-    <div className="pt-safe pb-safe px-safe flex h-dvh flex-col bg-white">
+    <div className="pt-safe pb-safe px-safe flex h-dvh flex-col bg-brand-bg">
       <Outlet />
     </div>
   )

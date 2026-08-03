@@ -1,9 +1,133 @@
 @import 'tailwindcss';
 
 /*
+ * ---------------------------------------------------------------------------
+ * 디자인 토큰
+ * ---------------------------------------------------------------------------
+ * 출처: puppynote-front-app/docs/webview-migration/01-design-spec.md §2
+ *
+ * 그 문서는 네이티브 앱 `src/` 아래 StyleSheet를 전수 조사해 만든 것이고,
+ * "figma_tokens.json과 실제 코드가 다르면 실제 코드가 기준"이라는 원칙을 따릅니다.
+ * 따라서 아래 값들의 기준은 figma_tokens.json이 아니라 네이티브 실제 코드입니다.
+ *
+ * Tailwind 4는 JS config(theme.extend)가 아니라 CSS의 `@theme` 블록을 씁니다.
+ * 문서 §2의 theme.extend 블록을 아래 네임스페이스로 옮겼습니다.
+ *   colors       -> --color-*
+ *   borderRadius -> --radius-*
+ *   spacing      -> --spacing-*
+ *   boxShadow    -> --shadow-*
+ *   fontSize     -> --text-*
+ *
+ * ⚠️ radius 스케일은 Tailwind 기본값(sm=4px, md=6px, ...)을 의도적으로 덮어씁니다.
+ *    네이티브가 쓰는 8/12/16/20/24/28/32 스케일에 이름을 맞추기 위해서입니다.
+ *    즉 이 프로젝트에서 `rounded-lg`는 16px이지 Tailwind 기본 8px이 아닙니다.
+ */
+@theme {
+  /* --- 브랜드 -------------------------------------------------------- */
+  --color-brand: #eebd2b;
+  /* 코드상 #eebd2b1a (8자리 HEX). 반투명 보더/하이라이트 */
+  --color-brand-10: rgba(238, 189, 43, 0.1);
+  /* 코드상 #eebd2b33. 스플래시 프로그레스 트랙 */
+  --color-brand-20: rgba(238, 189, 43, 0.2);
+  /* 앱 전역 배경. 스플래시만 #fcfbf8이었으나 불일치 #1로 이 값에 통일 */
+  --color-brand-bg: #fcfaf2;
+
+  /* --- 잉크(= Tailwind slate). 텍스트/보더 전반 ----------------------- */
+  --color-ink-900: #0f172a;
+  --color-ink-800: #1e293b;
+  --color-ink-700: #334155;
+  --color-ink-600: #475569;
+  --color-ink-500: #64748b;
+  --color-ink-400: #94a3b8;
+  --color-ink-300: #cbd5e1;
+  --color-ink-200: #e2e8f0;
+  --color-ink-100: #f1f5f9;
+  --color-ink-50: #f8fafc;
+
+  /* --- 시맨틱 --------------------------------------------------------- */
+  --color-success: #22c55e;
+  --color-success-bg: #f0fdf4;
+  /* 인증 성공 메시지 전용 (emerald-500) */
+  --color-success-alt: #10b981;
+  --color-warning: #f97316;
+  --color-warning-bg: #fff7ed;
+  --color-error: #ef4444;
+  --color-error-bg: #fef2f2;
+  --color-error-border: #fee2e2;
+  --color-error-border-strong: #fecaca;
+
+  /* --- 보조 팔레트 (Tailwind 기본값과 동일하지만 명시적으로 고정) ----- */
+  --color-amber-50: #fffbeb;
+  --color-amber-100: #fef3c7;
+  --color-amber-500: #f59e0b;
+  --color-amber-700: #b45309;
+  --color-sky-100: #e0f2fe;
+  --color-yellow-50: #fefce8;
+
+  /* --- 기타 ----------------------------------------------------------- */
+  --color-kakao: #fee500;
+  /* 알람 토글 OFF 트랙/썸. ON 트랙은 불일치 #3에 따라 브랜드 옐로우로 통일 */
+  --color-switch-off-track: #e9ecef;
+  --color-switch-off-thumb: #f4f3f4;
+  /* 모달 딤 오버레이 */
+  --color-dim: rgba(0, 0, 0, 0.5);
+
+  /* --- radius --------------------------------------------------------- */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --radius-2xl: 24px;
+  --radius-3xl: 28px;
+  --radius-4xl: 32px;
+  /* 네이티브는 999와 9999가 혼재. 불일치 #4에 따라 웹은 9999px 하나로 */
+  --radius-full: 9999px;
+
+  /* --- spacing (Tailwind 숫자 스케일과 병행해서 쓸 수 있는 별칭) ------ */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 12px;
+  --spacing-lg: 16px;
+  --spacing-xl: 20px;
+  --spacing-2xl: 24px;
+  --spacing-3xl: 32px;
+  --spacing-4xl: 40px;
+
+  /* --- shadow --------------------------------------------------------- */
+  --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.05);
+  --shadow-input: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-brand: 0 4px 8px rgba(238, 189, 43, 0.2);
+  --shadow-modal: 0 4px 16px rgba(0, 0, 0, 0.1);
+  /* FAB 전용 (네이티브 radius 10 / opacity 0.3) */
+  --shadow-fab: 0 4px 10px rgba(238, 189, 43, 0.3);
+
+  /* --- typography ----------------------------------------------------- */
+  /* 커스텀 폰트 없음. 네이티브 CustomText가 sans-serif만 지정합니다. */
+  --text-caption-xs: 10px;
+  --text-caption-xs--line-height: 14px;
+  --text-caption: 12px;
+  --text-caption--line-height: 16px;
+  --text-body: 14px;
+  --text-body--line-height: 20px;
+  --text-body-lg: 16px;
+  --text-body-lg--line-height: 24px;
+  --text-title-sm: 18px;
+  --text-title-sm--line-height: 26px;
+  --text-title: 20px;
+  --text-title--line-height: 28px;
+  --text-heading: 24px;
+  --text-heading--line-height: 32px;
+  --text-heading--letter-spacing: -0.5px;
+  --text-display-sm: 30px;
+  --text-display-sm--line-height: 38px;
+  --text-display-sm--letter-spacing: -0.5px;
+  --text-display: 40px;
+  --text-display--line-height: 48px;
+  --text-display--letter-spacing: -1px;
+}
+
+/*
  * 모바일 전용 셸의 구조 변수.
- * 색상/타이포 등 디자인 토큰은 이번 티켓 범위가 아니며, 후속 티켓에서
- * 네이티브 앱(NativeWind) 토큰을 옮겨오면서 @theme 블록으로 추가합니다.
  */
 :root {
   /* iOS 노치/홈 인디케이터 대응 (index.html의 viewport-fit=cover와 한 쌍) */
@@ -15,10 +139,21 @@
   /* 모바일 고정 폭. PC에서는 이 폭으로 가운데 정렬만 하고 반응형 대응은 하지 않습니다. */
   --app-max-width: 480px;
 
-  --top-bar-height: 52px;
-  --tab-bar-height: 56px;
+  /*
+   * TopBar 실제 높이 (safe-area 제외).
+   * 네이티브: paddingTop 8 + content(py 4 + 아이콘박스 48 + py 4) + paddingBottom 4 = 68
+   */
+  --top-bar-height: 68px;
+
+  /*
+   * BottomTab 콘텐츠 높이. 네이티브: paddingTop 12 + 아이콘 30 + paddingBottom 12
+   * 네이티브는 하단을 32px로 고정해 홈 인디케이터를 피하지만, 웹은 env()가 있으므로
+   * safe-bottom과 최소 여백 중 큰 값을 씁니다 (기기에 따라 32px 근처로 수렴).
+   */
+  --tab-bar-height: 54px;
+  --tab-bar-bottom-inset: max(var(--safe-bottom), 20px);
   /* 하단 탭이 실제로 차지하는 높이 (홈 인디케이터 여백 포함) */
-  --tab-bar-total-height: calc(var(--tab-bar-height) + var(--safe-bottom));
+  --tab-bar-total-height: calc(var(--tab-bar-height) + var(--tab-bar-bottom-inset));
 }
 
 html,
@@ -28,6 +163,8 @@ body {
 
 body {
   margin: 0;
+  background-color: var(--color-brand-bg);
+  color: var(--color-ink-900);
   font-family:
     'Pretendard',
     -apple-system,
@@ -77,10 +214,72 @@ body {
   padding-bottom: var(--tab-bar-total-height);
 }
 
+/*
+ * 하단 탭 자신이 홈 인디케이터를 피하기 위해 두는 아래 여백.
+ * `h-tab-bar`와 합치면 정확히 `--tab-bar-total-height`가 되도록 맞춰져 있습니다.
+ */
+@utility pb-tab-inset {
+  padding-bottom: var(--tab-bar-bottom-inset);
+}
+
 @utility h-top-bar {
   height: var(--top-bar-height);
 }
 
 @utility h-tab-bar {
   height: var(--tab-bar-height);
+}
+
+/*
+ * 화면 위에 떠 있는 요소(FAB 등)를 앱 고정 폭 안쪽 오른쪽에 붙입니다.
+ * #root가 가운데 정렬되어 있어 fixed 요소는 뷰포트 기준이 되므로,
+ * 화면이 앱 폭보다 넓을 때는 앱 영역의 오른쪽 가장자리로 보정합니다.
+ */
+@utility anchor-right {
+  right: max(calc(var(--safe-right) + 24px), calc(50vw - var(--app-max-width) / 2 + 24px));
+}
+
+/* WheelPicker처럼 세로 스냅 스크롤이 필요한 영역 */
+@utility snap-wheel {
+  scroll-snap-type: y mandatory;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* --- 모달/바텀시트 애니메이션 -------------------------------------- */
+@keyframes puppy-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes puppy-slide-up {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+@utility animate-fade-in {
+  animation: puppy-fade-in 180ms ease-out;
+}
+
+@utility animate-slide-up {
+  animation: puppy-slide-up 240ms cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

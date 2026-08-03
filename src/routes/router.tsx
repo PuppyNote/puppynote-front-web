@@ -1,8 +1,9 @@
-import { createBrowserRouter } from 'react-router-dom'
+import { createBrowserRouter, type RouteObject } from 'react-router-dom'
 
 import PlainLayout from '@/layouts/PlainLayout'
 import TabLayout from '@/layouts/TabLayout'
 import CommunityPage from '@/pages/CommunityPage'
+import DesignSystemPage from '@/pages/DesignSystemPage'
 import FoodPage from '@/pages/FoodPage'
 import HomePage from '@/pages/HomePage'
 import LoginPage from '@/pages/LoginPage'
@@ -11,6 +12,14 @@ import SettingsPage from '@/pages/SettingsPage'
 import SuppliesPage from '@/pages/SuppliesPage'
 import WalkPage from '@/pages/WalkPage'
 import { ROUTES } from './paths'
+
+/**
+ * 개발 전용 라우트. 디자인 토큰/공통 컴포넌트를 눈으로 확인하는 페이지입니다.
+ * 프로덕션 빌드에서는 배열이 비어 트리셰이킹으로 통째로 빠집니다.
+ */
+const devRoutes: RouteObject[] = import.meta.env.DEV
+  ? [{ path: '/__design', element: <DesignSystemPage /> }]
+  : []
 
 /**
  * 라우터 구성.
@@ -31,6 +40,7 @@ export const router = createBrowserRouter([
       { path: ROUTES.COMMUNITY, element: <CommunityPage /> },
       { path: ROUTES.FOOD, element: <FoodPage /> },
       { path: ROUTES.SETTINGS, element: <SettingsPage /> },
+      ...devRoutes,
     ],
   },
   {
