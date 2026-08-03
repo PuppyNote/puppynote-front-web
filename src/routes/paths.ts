@@ -12,6 +12,8 @@ export const ROUTES = {
   FOOD: '/food',
   SETTINGS: '/settings',
   LOGIN: '/login',
+  REGISTER: '/register',
+  PASSWORD_RESET: '/password-reset',
 } as const
 
 export type RoutePath = (typeof ROUTES)[keyof typeof ROUTES]

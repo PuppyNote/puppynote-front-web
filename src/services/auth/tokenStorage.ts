@@ -1,11 +1,16 @@
 /**
  * 토큰 저장소.
  *
- * 지금은 브라우저 localStorage만 사용합니다.
- * 앱 WebView 안에서는 앱의 SecureStore(브릿지 SET_TOKEN/GET_TOKEN/CLEAR_TOKEN)를 정본으로 삼고,
- * 여기 있는 메모리 캐시에 미러링하는 방식으로 확장할 예정입니다.
- * 브릿지 호출은 비동기라 axios 요청 인터셉터에서 바로 읽을 수 없으므로,
- * 앱 진입 시 `hydrateFromBridge()`로 한 번 끌어와 캐시에 채우는 형태가 됩니다. (후속 티켓)
+ * **정본은 앱의 SecureStore(브릿지 SET_TOKEN/GET_TOKEN/CLEAR_TOKEN)이고, 웹은 메모리에만 들고
+ * 있습니다.** localStorage에는 토큰을 남기지 않습니다 - 웹뷰의 저장소는 XSS 한 방으로 통째로
+ * 새는 자리라서, 승인된 기획서도 "localStorage 영구 저장 금지"를 조건으로 걸고 있습니다.
+ *
+ * 그래서 새로고침하면 메모리 캐시는 비고, 앱 진입 시 {@link hydrateFromBridge}가 SecureStore에서
+ * 다시 끌어옵니다. 일반 브라우저(개발용)에서는 끌어올 곳이 없으므로 새로고침하면 재로그인해야
+ * 합니다. 의도된 동작입니다.
+ *
+ * 브릿지 호출은 비동기라 axios 요청 인터셉터에서 바로 읽을 수 없어서, 읽기는 메모리 캐시가
+ * 담당하고 쓰기만 SecureStore로 흘려보내는 구조입니다.
  */
 import { BridgeAction, isInApp, requestBridge } from '@/bridge'
 import type { GetTokenData } from '@/bridge'
@@ -17,52 +22,29 @@ const REFRESH_TOKEN_KEY = 'refreshToken'
 let accessTokenCache: string | null = null
 let refreshTokenCache: string | null = null
 
-function readLocal(key: string): string | null {
-  try {
-    return localStorage.getItem(key)
-  } catch {
-    // 시크릿 모드 등에서 접근이 막힌 경우
-    return null
-  }
-}
-
-function writeLocal(key: string, value: string | null): void {
-  try {
-    if (value === null) localStorage.removeItem(key)
-    else localStorage.setItem(key, value)
-  } catch {
-    // 저장 실패는 무시하고 메모리 캐시로만 동작합니다.
-  }
-}
-
 export const tokenStorage = {
   getAccessToken(): string | null {
-    if (accessTokenCache === null) accessTokenCache = readLocal(ACCESS_TOKEN_KEY)
     return accessTokenCache
   },
 
   getRefreshToken(): string | null {
-    if (refreshTokenCache === null) refreshTokenCache = readLocal(REFRESH_TOKEN_KEY)
     return refreshTokenCache
   },
 
-  setTokens(accessToken: string, refreshToken?: string | null): void {
+  /**
+   * 토큰을 메모리에 넣고 앱 SecureStore에도 반영합니다.
+   * 저장이 끝난 뒤 화면을 넘겨야 하는 로그인 흐름에서는 반환된 Promise를 await 하세요.
+   */
+  setTokens(accessToken: string, refreshToken?: string | null): Promise<void> {
     accessTokenCache = accessToken
-    writeLocal(ACCESS_TOKEN_KEY, accessToken)
+    if (refreshToken) refreshTokenCache = refreshToken
 
-    if (refreshToken) {
-      refreshTokenCache = refreshToken
-      writeLocal(REFRESH_TOKEN_KEY, refreshToken)
-    }
-
-    void syncToBridge()
+    return syncToBridge()
   },
 
   clear(): void {
     accessTokenCache = null
     refreshTokenCache = null
-    writeLocal(ACCESS_TOKEN_KEY, null)
-    writeLocal(REFRESH_TOKEN_KEY, null)
 
     if (isInApp()) {
       void requestBridge(BridgeAction.CLEAR_TOKEN).catch(() => {})
@@ -84,20 +66,14 @@ export async function hydrateFromBridge(): Promise<void> {
       requestBridge<GetTokenData>(BridgeAction.GET_TOKEN, { key: REFRESH_TOKEN_KEY }),
     ])
 
-    if (access?.value) {
-      accessTokenCache = access.value
-      writeLocal(ACCESS_TOKEN_KEY, access.value)
-    }
-    if (refresh?.value) {
-      refreshTokenCache = refresh.value
-      writeLocal(REFRESH_TOKEN_KEY, refresh.value)
-    }
+    if (access?.value) accessTokenCache = access.value
+    if (refresh?.value) refreshTokenCache = refresh.value
   } catch {
-    // 구버전 앱이라 액션이 없거나 저장소 접근에 실패한 경우 - 웹 저장소만으로 진행합니다.
+    // 구버전 앱이라 액션이 없거나 저장소 접근에 실패한 경우 - 로그인 화면으로 진행합니다.
   }
 }
 
-/** 웹에서 갱신한 토큰을 앱 SecureStore에도 반영합니다. */
+/** 웹에서 발급/갱신한 토큰을 앱 SecureStore에 반영합니다. */
 async function syncToBridge(): Promise<void> {
   if (!isInApp()) return
 
@@ -115,6 +91,6 @@ async function syncToBridge(): Promise<void> {
       })
     }
   } catch {
-    // 앱 저장 실패가 웹 동작을 막지는 않도록 무시합니다.
+    // 앱 저장 실패가 웹 동작을 막지는 않도록 무시합니다. 이 세션은 메모리 캐시로 계속 돕니다.
   }
 }

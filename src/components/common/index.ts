@@ -39,6 +39,9 @@ export { SearchIcon, Spinner } from './icons'
 export { default as BottomSheetModal } from './modal/BottomSheetModal'
 export type { BottomSheetModalProps } from './modal/BottomSheetModal'
 
+export { default as CustomAlert } from './modal/CustomAlert'
+export type { CustomAlertProps } from './modal/CustomAlert'
+
 export { default as DatePickerModal } from './modal/DatePickerModal'
 export type { DatePickerModalProps } from './modal/DatePickerModal'
 

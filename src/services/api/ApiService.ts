@@ -165,7 +165,9 @@ class ApiService {
       throw new Error(body.message || '토큰 갱신에 실패했습니다.')
     }
 
-    tokenStorage.setTokens(body.data.accessToken, body.data.refreshToken)
+    // SecureStore 반영(비동기)을 기다리지 않고 새 토큰을 바로 돌려줍니다.
+    // 대기 중인 요청들을 먼저 깨워야 하고, 메모리 캐시는 이 시점에 이미 갱신돼 있습니다.
+    void tokenStorage.setTokens(body.data.accessToken, body.data.refreshToken)
     return body.data.accessToken
   }
 
