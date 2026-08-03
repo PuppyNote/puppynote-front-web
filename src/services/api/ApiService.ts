@@ -155,10 +155,12 @@ class ApiService {
     if (!refreshToken) throw new Error('저장된 리프레시 토큰이 없습니다.')
 
     // 인터셉터를 타지 않는 별도 인스턴스로 호출해 재귀 갱신을 막습니다.
+    // baseURL은 axios가 결합하게 맡깁니다. 직접 문자열을 이어붙이면
+    // VITE_API_URL이 슬래시로 끝날 때 경로에 `//`가 생겨 서버가 거부합니다.
     const { data: body } = await axios.post<ApiResponse<RefreshTokenData>>(
-      `${BASE_URL}${REFRESH_PATH}`,
+      REFRESH_PATH,
       { refreshToken },
-      { timeout: TIMEOUT },
+      { baseURL: BASE_URL, timeout: TIMEOUT },
     )
 
     if (body.statusCode !== 200 || !body.data?.accessToken) {
