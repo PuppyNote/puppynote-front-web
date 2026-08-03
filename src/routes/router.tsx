@@ -13,6 +13,7 @@ import RegisterPage from '@/pages/RegisterPage'
 import SettingsPage from '@/pages/SettingsPage'
 import SuppliesPage from '@/pages/SuppliesPage'
 import WalkPage from '@/pages/WalkPage'
+import PetProvider from '@/services/pet/PetProvider'
 import AuthLayout from './AuthLayout'
 import ProtectedRoute from './ProtectedRoute'
 import { ROUTES } from './paths'
@@ -21,9 +22,21 @@ import { ROUTES } from './paths'
  * 개발 전용 라우트. 디자인 토큰/공통 컴포넌트를 눈으로 확인하는 페이지입니다.
  * 로그인 없이 보려고 보호 라우트 밖에 둡니다.
  * 프로덕션 빌드에서는 배열이 비어 트리셰이킹으로 통째로 빠집니다.
+ *
+ * `TabLayout`이 펫 컨텍스트를 읽으므로 여기서도 Provider를 씌웁니다.
+ * 로그인 상태가 아니면 조회를 걸지 않으므로 목록은 비어 있는 채로 그려집니다.
  */
 const devRoutes: RouteObject[] = import.meta.env.DEV
-  ? [{ element: <TabLayout />, children: [{ path: '/__design', element: <DesignSystemPage /> }] }]
+  ? [
+      {
+        element: (
+          <PetProvider>
+            <TabLayout />
+          </PetProvider>
+        ),
+        children: [{ path: '/__design', element: <DesignSystemPage /> }],
+      },
+    ]
   : []
 
 /**

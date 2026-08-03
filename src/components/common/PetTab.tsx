@@ -1,19 +1,9 @@
+import type { PetSummary } from '@/services/api/endpoints/pet'
+
 import ScrollableTab, { type ScrollableTabItem } from './ScrollableTab'
 
-/**
- * 펫 요약 정보.
- *
- * 네이티브 `services/pet/PetService.ts`의 `PetSummary`와 필드명을 맞춘 것입니다.
- * 웹 쪽 PetService/PetContext는 아직 없으므로 여기서는 타입만 두고, 실제 조회·선택 상태는
- * 후속 티켓에서 컨텍스트로 올립니다.
- */
-export interface PetSummary {
-  petId: number
-  petName: string
-  petProfileUrl?: string
-  /** 'OWNER'인 펫만 삭제 버튼이 노출됩니다. */
-  roleType: string
-}
+/** 펫 요약 정보의 정본은 엔드포인트 모듈에 있습니다. 편의를 위해 여기서도 다시 내보냅니다. */
+export type { PetSummary }
 
 export interface PetTabProps {
   pets: PetSummary[]
@@ -21,7 +11,7 @@ export interface PetTabProps {
   onSelect: (petId: number) => void
   /** 펫 등록 모달을 여는 콜백. 없으면 `+` 버튼이 나오지 않습니다. */
   onAdd?: () => void
-  /** 삭제 확인 흐름은 호출부(또는 후속 티켓의 CustomAlert)가 담당합니다. */
+  /** 삭제 확인 흐름은 호출부가 담당합니다 ({@link ../pet/PetTabBar}의 확인 알럿). */
   onDelete?: (pet: PetSummary) => void
   className?: string
 }
@@ -29,9 +19,9 @@ export interface PetTabProps {
 /**
  * 네이티브 `components/common/item/PetTab.tsx` 이식.
  *
- * 네이티브 원본은 PetContext에서 목록을 직접 읽고 등록 모달/확인 알럿까지 안고 있었지만,
- * 웹에서는 **표시 전용**으로 분리했습니다. 데이터·모달은 아직 이 프로젝트에 없고,
- * 이렇게 두면 화면 티켓에서 그대로 재사용할 수 있습니다.
+ * 네이티브 원본은 PetContext에서 목록을 직접 읽고 등록 모달/확인 알럿까지 안고 있지만,
+ * 웹에서는 **표시 전용**으로 분리했습니다. 데이터·모달을 붙인 버전은
+ * {@link ../pet/PetTabBar}이고, 화면은 그쪽을 씁니다.
  */
 export default function PetTab({
   pets,

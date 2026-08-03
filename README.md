@@ -54,17 +54,21 @@ src/
 │   ├── bridge.ts      #   isInApp / requestBridge / onBridgeEvent
 │   └── useBridge.ts   #   React 훅
 ├── components/
+│   ├── auth/          # 로그인/회원가입 화면 조각
 │   ├── common/        # 화면 공용 컴포넌트 (+ modal/, index.ts barrel)
-│   └── layout/        # TopBar, BottomTabBar
-├── hooks/             # useHardwareBack, useBodyScrollLock
+│   ├── layout/        # TopBar, BottomTabBar
+│   └── pet/           # 펫 컨텍스트에 붙어 있는 컴포넌트 (PetTabBar, PetRegistrationModal)
+├── hooks/             # useAlert, useHardwareBack, useBodyScrollLock, usePullToRefresh
 ├── layouts/           # TabLayout(탭 있음) / PlainLayout(탭 없음)
 ├── pages/             # 화면 단위 컴포넌트
-├── routes/            # paths.ts(경로 상수·탭 정의), router.tsx
+├── routes/            # paths.ts(경로 상수·탭 정의), router.tsx, ProtectedRoute
 ├── services/
-│   ├── api/           # ApiService(axios 인스턴스·인터셉터), types
-│   ├── auth/          # tokenStorage
-│   └── image/         # imagePicker (브릿지 PICK_IMAGE + <input type="file"> 폴백)
-├── utils/             # cn (className 합치기)
+│   ├── api/           # ApiService(axios 인스턴스·인터셉터), types, endpoints/
+│   ├── auth/          # tokenStorage, authService, AuthProvider
+│   ├── image/         # imagePicker (브릿지 PICK_IMAGE + <input type="file"> 폴백)
+│   ├── location/      # 현재 좌표 (브릿지 GET_LOCATION + Geolocation API 폴백)
+│   └── pet/           # PetContext/PetProvider (펫 목록·선택 상태), selectedPetStorage
+├── utils/             # cn(className 합치기), date, clipboard
 └── index.css          # Tailwind 진입점 + @theme 디자인 토큰 + 모바일 셸 변수/유틸리티
 ```
 
@@ -75,8 +79,10 @@ src/
 - `index.html`의 viewport: `viewport-fit=cover`, `user-scalable=no` — 노치 대응 + 웹뷰 확대 방지
 - `#root`는 `--app-max-width`(480px)로 고정, PC에서는 가운데 정렬만 합니다
 - safe-area는 CSS 변수(`--safe-top/bottom/left/right`)와 유틸리티(`pt-safe`, `pb-safe`, `px-safe`, `pb-tab-bar`)로 다룹니다
-- `TabLayout`은 세로 flex 3단(상단 바 / 스크롤 본문 / 하단 탭) 구조라 탭 바를 `fixed`로 띄우지 않아도 되고, 키보드가 올라와도 레이아웃이 깨지지 않습니다
+- `TabLayout`은 세로 flex(상단 바 / 펫 탭 / 스크롤 본문 / 하단 탭) 구조라 탭 바를 `fixed`로 띄우지 않아도 되고, 키보드가 올라와도 레이아웃이 깨지지 않습니다
 - 하단 탭 구성은 네이티브 앱 `AppNavigator`와 동일합니다: 홈 / 산책 / 용품 / 커뮤니티 / 음식 / 설정
+- 스크롤 본문(`<main data-scroll-container>`)은 하나뿐이고, 화면은 그 안쪽만 그립니다. 당겨서 새로고침(`usePullToRefresh`)은 이 표식으로 스크롤 요소를 찾습니다
+- 상단 펫 탭이 보이는 화면은 `routes/paths.ts`의 `PET_TAB_ROUTES`가 정합니다 (네이티브 `Layout showPetTab`에 대응)
 
 ## 디자인 시스템
 
@@ -127,7 +133,9 @@ src/
 | `common/FloatingActionButton`            | `common/item/FloatingActionButton.tsx`         | `fixed` + `anchor-right`                                  |
 | `common/SearchBar`                       | `common/item/SearchBar.tsx`                    |                                                          |
 | `common/ScrollableTab`                   | `common/item/ScrollableTab.tsx`                |                                                          |
-| `common/PetTab`                          | `common/item/PetTab.tsx`                       | 표시 전용(데이터·모달 분리)                               |
+| `common/PetTab`                          | `common/item/PetTab.tsx`                       | 표시 전용. 데이터·모달을 붙인 것은 `pet/PetTabBar`         |
+| `pet/PetTabBar`                          | `common/item/PetTab.tsx`                       | 펫 컨텍스트 + 등록 모달 + 삭제 확인 알럿                   |
+| `pet/PetRegistrationModal`               | `common/modal/PetRegistrationModal.tsx`        | 등록/수정 겸용. 가운데 모달(바텀시트 아님)                 |
 | `common/WheelPicker`                     | `common/item/WheelPicker.tsx`                  | **프로토타입** — 스크롤 스냅 기반                          |
 | `common/PagedList`                       | `common/item/PagedFlatList.tsx`                | **프로토타입** — IntersectionObserver 무한 스크롤          |
 | `common/MultiImageSelector`              | `common/item/MultiImageSelector.tsx`           | 브릿지 `PICK_IMAGE` + `<input type="file">` 폴백           |
@@ -145,6 +153,39 @@ src/
 - 갱신까지 실패하면 토큰을 지우고 `setLogoutListener` 콜백 호출 → `App.tsx`가 `/login`으로 보냅니다
 
 갱신 엔드포인트/응답 형태는 네이티브 앱의 `src/services/ApiService.ts`와 동일하게 맞춰 두었고, 실제 연동 티켓에서 백엔드와 최종 확인합니다.
+
+### 엔드포인트 모듈
+
+`src/services/api/endpoints/*`. 필드명·상태코드는 `puppynote-server`의 컨트롤러/DTO를 직접 대조해 맞췄습니다.
+
+| 모듈         | 엔드포인트                                                       | 서버 원본                     |
+| ------------ | ---------------------------------------------------------------- | ----------------------------- |
+| `auth`       | `/api/v1/auth/*`, `/api/v1/user/signup`, `/api/v1/user/email/send` | `LoginController` `UserController` |
+| `user`       | `GET /api/v1/user/profile`                                        | `UserController`              |
+| `pet`        | `GET/POST /api/v1/pets`, `PATCH/DELETE /api/v1/pets/{petId}`      | `PetController`               |
+| `home`       | `GET /api/v1/home?petId=`                                         | `HomeController`              |
+| `weather`    | `GET /api/v1/weather?latitude=&longitude=`                        | `WeatherController`           |
+| `petTip`     | `GET /api/v1/pet-tips/random`                                     | `PetTipController`            |
+| `petItem`    | `GET /api/v1/pet-items?petId=` (목록만 — 용품 티켓에서 확장)       | `PetItemController`           |
+| `storage`    | `POST /api/v1/storage/{bucketKind}` (multipart)                   | `StorageController`           |
+
+> 업로드 응답은 **이미지 키**이고 조회 응답은 **CloudFront 전체 URL**입니다. 기존 이미지를 그대로
+> 유지할 때는 `extractImageKey(url)`로 키를 되뽑아 보냅니다(네이티브와 같은 방식).
+
+## 펫 상태 (PetContext)
+
+`src/services/pet/`. 선택된 펫은 홈·산책·용품·가족 관리가 함께 보는 값이라 전역에 둡니다.
+
+```ts
+const { pets, selectedPet, isLoadingPet, updateSelectedPet, refreshPets } = usePet()
+```
+
+- Provider는 `ProtectedRoute` 안에 있습니다. 로그인해야 조회할 수 있는 데이터이고, 로그아웃하면
+  언마운트되며 상태가 함께 비워집니다(네이티브 `resetPetContext`가 필요 없는 이유)
+- 선택은 앱 SecureStore(`selectedPetId`/`selectedPetName`), 브라우저에서는 localStorage에 남습니다.
+  펫 id/이름뿐이라 토큰과 달리 localStorage를 허용합니다
+- 화면은 `isLoadingPet`이 false가 된 뒤에 데이터를 부르세요. 그 전에 부르면 "펫 없음"으로 잘못 그려집니다
+- `BottomTabBar`의 `hasPet`(산책/용품 잠금)도 이 값으로 `TabLayout`이 내려줍니다
 
 ## 앱 브릿지
 
@@ -188,12 +229,31 @@ const images = await pickImages({ max: 10 }) // 취소하면 빈 배열
 쓰지만 반환 형태(`PickedWebImage`)는 같습니다. 앱이 직접 업로드하고 URL만 돌려주는 `UPLOAD_IMAGE`
 액션이 나중에 생기면 `src`가 URL로 바뀔 뿐이라 호출부는 그대로입니다.
 
+서버로 올릴 때는 `storageApi.uploadImage('PUPPY_PROFILE', picked)`를 쓰면 됩니다.
+
+### 위치
+
+```ts
+const { latitude, longitude } = await getCurrentCoordinates()
+```
+
+앱 안에서는 브릿지 `GET_LOCATION`(accuracy: balanced), 일반 브라우저에서는 웹 표준
+Geolocation API를 씁니다. 권한 거부 등은 예외로 던지므로, 호출부에서 해당 UI만 감추면 됩니다
+(홈 날씨 위젯이 그렇게 동작합니다).
+
+## 화면 이식 현황
+
+| 화면                       | 상태     | 네이티브 원본                                    |
+| -------------------------- | -------- | ------------------------------------------------ |
+| 로그인 / 회원가입 / 비번찾기 | 완료     | `screens/login/*`                                |
+| 홈                         | 완료     | `screens/home/HomeScreen.tsx`                    |
+| 반려동물 등록/관리         | 완료     | `common/modal/PetRegistrationModal.tsx`, `common/item/PetTab.tsx` |
+| 산책 / 용품 / 커뮤니티 / 음식 / 설정 | 예정 | `screens/walk|supply|community|food|setting/*` |
+
 ## 다음 단계 (후속 티켓)
 
-- 화면별 이식 (`src/pages/*`의 PlaceholderPage 교체)
-- 인증 플로우 + 보호 라우트, 브릿지 로그인 액션 연동
-- 엔드포인트 모듈(`src/services/api/endpoints/*`) 추가
-- PetContext(펫 목록·선택 상태) → `BottomTabBar`의 `hasPet`, `PetTab` 연결
-- `CustomAlert` 이식 후 `MultiImageSelector`/`BottomTabBar`의 `onError`·`onDisabledTabClick` 연결
+- 남은 화면 이식 (`src/pages/*`의 PlaceholderPage 교체)
+- 용품 화면 이식 시 `endpoints/petItem.ts`에 등록/수정/삭제·구매 이력 추가
+- 가족 관리 화면 이식 시 `PET_TAB_ROUTES`에 경로 추가
 - 알림 서비스 이식 후 `TopBar`의 미확인 알림 표시·이동 연결
 - `WheelPicker`/`PagedList` 완성도 보강 (휠 원근 효과, 목록 가상 스크롤)

@@ -24,9 +24,9 @@ import type { PickedWebImage } from '@/services/image/imagePicker'
  */
 
 const SAMPLE_PETS: PetSummary[] = [
-  { petId: 1, petName: '뭉치', roleType: 'OWNER' },
-  { petId: 2, petName: '보리', roleType: 'OWNER' },
-  { petId: 3, petName: '초코', roleType: 'MEMBER' },
+  { petId: 1, petName: '뭉치', petProfileUrl: '', roleType: 'OWNER' },
+  { petId: 2, petName: '보리', petProfileUrl: '', roleType: 'OWNER' },
+  { petId: 3, petName: '초코', petProfileUrl: '', roleType: 'MEMBER' },
 ]
 
 interface SampleRow {
