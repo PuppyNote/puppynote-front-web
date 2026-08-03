@@ -1,0 +1,10 @@
+# 저장소에는 LF로 보관합니다 (Windows/맥 혼용 환경에서 줄바꿈 diff 방지)
+* text=auto eol=lf
+
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.woff binary
+*.woff2 binary

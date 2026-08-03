@@ -1,0 +1,86 @@
+@import 'tailwindcss';
+
+/*
+ * 모바일 전용 셸의 구조 변수.
+ * 색상/타이포 등 디자인 토큰은 이번 티켓 범위가 아니며, 후속 티켓에서
+ * 네이티브 앱(NativeWind) 토큰을 옮겨오면서 @theme 블록으로 추가합니다.
+ */
+:root {
+  /* iOS 노치/홈 인디케이터 대응 (index.html의 viewport-fit=cover와 한 쌍) */
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+
+  /* 모바일 고정 폭. PC에서는 이 폭으로 가운데 정렬만 하고 반응형 대응은 하지 않습니다. */
+  --app-max-width: 480px;
+
+  --top-bar-height: 52px;
+  --tab-bar-height: 56px;
+  /* 하단 탭이 실제로 차지하는 높이 (홈 인디케이터 여백 포함) */
+  --tab-bar-total-height: calc(var(--tab-bar-height) + var(--safe-bottom));
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family:
+    'Pretendard',
+    -apple-system,
+    BlinkMacSystemFont,
+    system-ui,
+    'Apple SD Gothic Neo',
+    'Malgun Gothic',
+    sans-serif;
+  /* 웹뷰에서 화면 전체가 당겨지는 bounce / pull-to-refresh를 막습니다. */
+  overscroll-behavior-y: none;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-font-smoothing: antialiased;
+  text-size-adjust: 100%;
+}
+
+#root {
+  max-width: var(--app-max-width);
+  margin: 0 auto;
+  height: 100%;
+}
+
+/* 스크롤바 숨김 (가로 스크롤 영역 등에 사용) */
+@utility no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* safe-area 유틸리티 */
+@utility pt-safe {
+  padding-top: var(--safe-top);
+}
+
+@utility pb-safe {
+  padding-bottom: var(--safe-bottom);
+}
+
+@utility px-safe {
+  padding-left: var(--safe-left);
+  padding-right: var(--safe-right);
+}
+
+/* 하단 탭에 콘텐츠가 가리지 않도록 확보하는 여백 */
+@utility pb-tab-bar {
+  padding-bottom: var(--tab-bar-total-height);
+}
+
+@utility h-top-bar {
+  height: var(--top-bar-height);
+}
+
+@utility h-tab-bar {
+  height: var(--tab-bar-height);
+}

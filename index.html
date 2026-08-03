@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <!--
+      모바일 전용 뷰포트.
+      - viewport-fit=cover : iOS 노치/홈 인디케이터 영역까지 그려서 safe-area-inset을 쓸 수 있게 합니다.
+      - maximum-scale / user-scalable=no : 앱 WebView 안에서 더블탭 확대와 입력 포커스 시 자동 줌을 막습니다.
+    -->
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
+    />
+    <meta name="format-detection" content="telephone=no" />
+    <meta name="theme-color" content="#ffffff" />
+    <title>PuppyNote</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
