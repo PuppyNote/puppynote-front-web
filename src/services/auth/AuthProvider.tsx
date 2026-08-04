@@ -77,9 +77,14 @@ export default function AuthProvider({ children }: AuthProviderProps) {
     setStatus('unauthenticated')
   }, [])
 
+  const refreshProfile = useCallback(async () => {
+    const profile = await authService.fetchProfile()
+    if (profile) setUser((prev) => toAuthUser(profile, prev?.email ?? profile.email))
+  }, [])
+
   const value = useMemo(
-    () => ({ status, user, loginWithEmail, loginWithKakao, loginWithApple, logout }),
-    [status, user, loginWithEmail, loginWithKakao, loginWithApple, logout],
+    () => ({ status, user, loginWithEmail, loginWithKakao, loginWithApple, logout, refreshProfile }),
+    [status, user, loginWithEmail, loginWithKakao, loginWithApple, logout, refreshProfile],
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

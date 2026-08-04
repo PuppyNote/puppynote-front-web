@@ -12,6 +12,11 @@ export interface UserProfile {
   profileUrl: string | null
 }
 
+export interface UpdateProfilePayload {
+  nickName: string
+  profileUrl?: string | null
+}
+
 export const userApi = {
   /**
    * 내 프로필 조회.
@@ -20,5 +25,17 @@ export const userApi = {
   async getProfile(): Promise<UserProfile> {
     const response = await apiService.get<UserProfile>('/api/v1/user/profile')
     return unwrapApiResponse(response, 200, '프로필 조회에 실패했습니다.')
+  },
+
+  /** 닉네임/프로필 이미지 수정 */
+  async updateProfile(payload: UpdateProfilePayload): Promise<void> {
+    const response = await apiService.patch<null>('/api/v1/user/profile', payload)
+    unwrapApiResponse(response, 200, '프로필 수정에 실패했습니다.')
+  },
+
+  /** 회원 탈퇴 */
+  async withdraw(): Promise<void> {
+    const response = await apiService.delete<null>('/api/v1/user/withdraw')
+    unwrapApiResponse(response, 200, '회원탈퇴에 실패했습니다.')
   },
 }

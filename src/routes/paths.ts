@@ -50,9 +50,9 @@ export interface TabItem {
 /**
  * 상단 펫 탭이 보이는 화면들.
  *
- * 네이티브에서 `Layout showPetTab={true}`를 켜는 화면과 같습니다
- * (HomeScreen / WalkManagement / SuppliesScreen, 그리고 설정의 FamilyManagementScreen).
- * 가족 관리 화면은 아직 이식 전이라 이식 티켓에서 이 배열에 추가하세요.
+ * 네이티브에서 `Layout showPetTab={true}`를 켜는 화면과 같습니다 (HomeScreen / WalkManagement /
+ * SuppliesScreen). FamilyManagementScreen도 펫 탭을 켜지만 하단 탭 없는 스택 화면이라
+ * {@link ../pages/FamilyManagementPage}가 이 배열에 기대지 않고 직접 그립니다.
  */
 export const PET_TAB_ROUTES: RoutePath[] = [ROUTES.HOME, ROUTES.WALK, ROUTES.SUPPLIES]
 

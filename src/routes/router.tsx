@@ -5,10 +5,12 @@ import TabLayout from '@/layouts/TabLayout'
 import AddPostPage from '@/pages/AddPostPage'
 import AddSupplyPage from '@/pages/AddSupplyPage'
 import AddWalkPage from '@/pages/AddWalkPage'
+import AlertHistoryPage from '@/pages/AlertHistoryPage'
 import CategoryManagementPage from '@/pages/CategoryManagementPage'
 import CommunityDetailPage from '@/pages/CommunityDetailPage'
 import CommunityPage from '@/pages/CommunityPage'
 import DesignSystemPage from '@/pages/DesignSystemPage'
+import FamilyManagementPage from '@/pages/FamilyManagementPage'
 import FoodPage from '@/pages/FoodPage'
 import HomePage from '@/pages/HomePage'
 import LoginPage from '@/pages/LoginPage'
@@ -84,6 +86,8 @@ export const router = createBrowserRouter([
               { path: ROUTES.COMMUNITY_MY, element: <MyPostsPage /> },
               { path: '/community/:postId', element: <CommunityDetailPage /> },
               { path: '/community/:postId/edit', element: <AddPostPage /> },
+              { path: ROUTES.ALERT_HISTORY, element: <AlertHistoryPage /> },
+              { path: ROUTES.FAMILY_MANAGEMENT, element: <FamilyManagementPage /> },
             ],
           },
         ],

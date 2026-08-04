@@ -30,6 +30,8 @@ export interface AuthContextValue {
   loginWithKakao: () => Promise<void>
   loginWithApple: () => Promise<void>
   logout: () => void
+  /** 프로필 수정 후 상단 바/설정 화면에 즉시 반영하려고 다시 조회합니다. */
+  refreshProfile: () => Promise<void>
 }
 
 export const AuthContext = createContext<AuthContextValue | null>(null)

@@ -1,11 +1,13 @@
-import { Outlet, useLocation } from 'react-router-dom'
+import { useEffect, useState } from 'react'
+import { Outlet, useLocation, useNavigate } from 'react-router-dom'
 
 import { CustomAlert } from '@/components/common'
 import BottomTabBar from '@/components/layout/BottomTabBar'
 import TopBar from '@/components/layout/TopBar'
 import PetTabBar from '@/components/pet/PetTabBar'
 import { useAlert } from '@/hooks/useAlert'
-import { PET_TAB_ROUTES } from '@/routes/paths'
+import { alertHistoryApi } from '@/services/api/endpoints/alertHistory'
+import { ROUTES, PET_TAB_ROUTES } from '@/routes/paths'
 import { usePet } from '@/services/pet/PetContext'
 
 /**
@@ -23,18 +25,27 @@ import { usePet } from '@/services/pet/PetContext'
  */
 export default function TabLayout() {
   const { pathname } = useLocation()
+  const navigate = useNavigate()
   const { selectedPet } = usePet()
   const { alert, showSimpleAlert, hideAlert } = useAlert()
+  const [hasNotification, setHasNotification] = useState(false)
 
   const showPetTab = (PET_TAB_ROUTES as readonly string[]).includes(pathname)
 
+  // 탭을 오갈 때마다(= 네이티브의 화면 focus) 다시 확인합니다.
+  useEffect(() => {
+    void alertHistoryApi
+      .getUncheckedAlertExists()
+      .then(setHasNotification)
+      .catch((error: unknown) => console.warn('알림 여부 조회 실패', error))
+  }, [pathname])
+
   return (
     <div className="flex h-dvh flex-col bg-brand-bg">
-      {/*
-        알림 버튼은 아직 이동할 화면(AlertHistory)이 없어 동작을 붙이지 않았습니다.
-        미확인 알림 여부도 알림 서비스 이식 후에 내려줍니다.
-      */}
-      <TopBar />
+      <TopBar
+        hasNotification={hasNotification}
+        onNotificationClick={() => navigate(ROUTES.ALERT_HISTORY)}
+      />
 
       {showPetTab && <PetTabBar />}
 
