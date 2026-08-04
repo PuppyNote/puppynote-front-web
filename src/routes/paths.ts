@@ -9,15 +9,31 @@ export const ROUTES = {
   WALK: '/walk',
   ADD_WALK: '/walk/add',
   SUPPLIES: '/supplies',
+  ADD_SUPPLY: '/supplies/add',
+  SUPPLY_CATEGORIES: '/supplies/categories',
   COMMUNITY: '/community',
+  COMMUNITY_ADD: '/community/add',
+  COMMUNITY_MY: '/community/my',
   FOOD: '/food',
   SETTINGS: '/settings',
+  FAMILY_MANAGEMENT: '/settings/family',
+  ALERT_HISTORY: '/settings/alerts',
   LOGIN: '/login',
   REGISTER: '/register',
   PASSWORD_RESET: '/password-reset',
 } as const
 
 export type RoutePath = (typeof ROUTES)[keyof typeof ROUTES]
+
+/** 게시물 상세 경로. `postId`가 실려 있어 상수로 둘 수 없어 함수로 뺐습니다. */
+export function communityDetailPath(postId: number): string {
+  return `/community/${postId}`
+}
+
+/** 게시물 수정 경로. {@link ../pages/AddPostPage}가 작성 화면과 함께 씁니다. */
+export function communityEditPath(postId: number): string {
+  return `/community/${postId}/edit`
+}
 
 export interface TabItem {
   path: RoutePath

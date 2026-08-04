@@ -2,12 +2,17 @@ import { createBrowserRouter, type RouteObject } from 'react-router-dom'
 
 import PlainLayout from '@/layouts/PlainLayout'
 import TabLayout from '@/layouts/TabLayout'
+import AddPostPage from '@/pages/AddPostPage'
+import AddSupplyPage from '@/pages/AddSupplyPage'
 import AddWalkPage from '@/pages/AddWalkPage'
+import CategoryManagementPage from '@/pages/CategoryManagementPage'
+import CommunityDetailPage from '@/pages/CommunityDetailPage'
 import CommunityPage from '@/pages/CommunityPage'
 import DesignSystemPage from '@/pages/DesignSystemPage'
 import FoodPage from '@/pages/FoodPage'
 import HomePage from '@/pages/HomePage'
 import LoginPage from '@/pages/LoginPage'
+import MyPostsPage from '@/pages/MyPostsPage'
 import NotFoundPage from '@/pages/NotFoundPage'
 import PasswordResetPage from '@/pages/PasswordResetPage'
 import RegisterPage from '@/pages/RegisterPage'
@@ -69,9 +74,17 @@ export const router = createBrowserRouter([
             ],
           },
           {
-            // 하단 탭 없이 뒤로가기 헤더만 있는 등록/추가 화면들 (네이티브 스택 화면에 대응)
+            // 하단 탭 없이 뒤로가기 헤더만 있는 등록/추가/상세 화면들 (네이티브 스택 화면에 대응)
             element: <PlainLayout />,
-            children: [{ path: ROUTES.ADD_WALK, element: <AddWalkPage /> }],
+            children: [
+              { path: ROUTES.ADD_WALK, element: <AddWalkPage /> },
+              { path: ROUTES.ADD_SUPPLY, element: <AddSupplyPage /> },
+              { path: ROUTES.SUPPLY_CATEGORIES, element: <CategoryManagementPage /> },
+              { path: ROUTES.COMMUNITY_ADD, element: <AddPostPage /> },
+              { path: ROUTES.COMMUNITY_MY, element: <MyPostsPage /> },
+              { path: '/community/:postId', element: <CommunityDetailPage /> },
+              { path: '/community/:postId/edit', element: <AddPostPage /> },
+            ],
           },
         ],
       },
