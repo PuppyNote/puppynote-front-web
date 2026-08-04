@@ -14,9 +14,10 @@ export interface WalkHistory {
   endTime: string
   latitude: number
   longitude: number
-  location: string
-  memo: string
-  photoUrl: string
+  location: string | null
+  memo: string | null
+  /** 대표 사진 (첫 장). 사진이 없으면 null */
+  photoUrl: string | null
 }
 
 export interface WalkDetail {
@@ -26,8 +27,8 @@ export interface WalkDetail {
   endTime: string
   latitude: number
   longitude: number
-  location: string
-  memo: string
+  location: string | null
+  memo: string | null
   photoUrls: string[]
 }
 
