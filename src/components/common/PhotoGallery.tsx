@@ -7,8 +7,14 @@ import { cn } from '@/utils/cn'
 
 export interface PhotoGalleryProps {
   photoUrls: string[]
-  /** 카드 높이 (기본 240 = 네이티브와 동일) */
+  /** 카드 높이 (기본 240 = 네이티브 산책 상세와 동일). `square`가 true면 무시됩니다. */
   height?: number
+  /** true면 높이를 폭에 맞춰 1:1 정사각형으로 늘립니다 (네이티브 커뮤니티 카드/상세 이미지). */
+  square?: boolean
+  /** 기본 true. false면 모서리를 둥글리지 않습니다 (커뮤니티 상세의 풀블리드 이미지). */
+  rounded?: boolean
+  /** 넘기면 탭했을 때 라이트박스 대신 이 함수를 부릅니다 (커뮤니티 카드 → 상세 이동 등). */
+  onImageClick?: () => void
   className?: string
 }
 
@@ -22,7 +28,14 @@ export interface PhotoGalleryProps {
  *     아니라고 판단해 확대 없는 라이트박스(원본 크기 표시 + 스와이프)로 대체했습니다.
  *   - 카드 자체는 `scroll-snap`으로 가로 스와이프만 지원합니다 (탭하면 전체화면 라이트박스).
  */
-export default function PhotoGallery({ photoUrls, height = 240, className }: PhotoGalleryProps) {
+export default function PhotoGallery({
+  photoUrls,
+  height = 240,
+  square = false,
+  rounded = true,
+  onImageClick,
+  className,
+}: PhotoGalleryProps) {
   const [activeIndex, setActiveIndex] = useState(0)
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null)
   const scrollerRef = useRef<HTMLDivElement>(null)
@@ -38,19 +51,28 @@ export default function PhotoGallery({ photoUrls, height = 240, className }: Pho
   }
 
   return (
-    <div className={cn('relative overflow-hidden rounded-2xl bg-ink-100', className)}>
+    <div
+      className={cn(
+        'relative overflow-hidden bg-ink-100',
+        rounded && 'rounded-2xl',
+        square && 'aspect-square',
+        className,
+      )}
+    >
       <div
         ref={scrollerRef}
         onScroll={handleScroll}
         className="no-scrollbar flex overflow-x-auto overscroll-x-contain"
-        style={{ scrollSnapType: 'x mandatory', height }}
+        style={{ scrollSnapType: 'x mandatory', height: square ? undefined : height }}
       >
         {photoUrls.map((url, index) => (
           <button
             key={url + index}
             type="button"
-            onClick={() => setLightboxIndex(index)}
-            aria-label={`사진 ${index + 1}/${photoUrls.length} 크게 보기`}
+            onClick={() => (onImageClick ? onImageClick() : setLightboxIndex(index))}
+            aria-label={
+              onImageClick ? '게시물 상세 보기' : `사진 ${index + 1}/${photoUrls.length} 크게 보기`
+            }
             className="h-full w-full shrink-0 snap-center"
           >
             <img src={url} alt="" className="size-full object-cover" />
