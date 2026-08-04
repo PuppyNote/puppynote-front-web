@@ -39,10 +39,11 @@ npm run dev            # http://localhost:3000 (LAN 바인딩되어 실기기에
 
 `.env` (git 미추적, `.env.example` 참고)
 
-| 키                 | 설명                          |
-| ------------------ | ----------------------------- |
-| `VITE_API_URL`     | puppynote-server 주소         |
-| `VITE_API_TIMEOUT` | 요청 타임아웃(ms). 기본 10000 |
+| 키                        | 설명                                                             |
+| ------------------------- | ---------------------------------------------------------------- |
+| `VITE_API_URL`            | puppynote-server 주소                                            |
+| `VITE_API_TIMEOUT`        | 요청 타임아웃(ms). 기본 10000                                    |
+| `VITE_KAKAO_MAP_APP_KEY`  | 카카오맵 JS SDK 앱 키 (산책 상세의 위치 지도). 비어 있으면 그 영역만 안내 문구로 대체됩니다. [Kakao Developers](https://developers.kakao.com) 앱 설정 > 플랫폼 > Web에 서비스 도메인 등록 필요 |
 
 ## 폴더 구조
 
@@ -57,7 +58,8 @@ src/
 │   ├── auth/          # 로그인/회원가입 화면 조각
 │   ├── common/        # 화면 공용 컴포넌트 (+ modal/, index.ts barrel)
 │   ├── layout/        # TopBar, BottomTabBar
-│   └── pet/           # 펫 컨텍스트에 붙어 있는 컴포넌트 (PetTabBar, PetRegistrationModal)
+│   ├── pet/           # 펫 컨텍스트에 붙어 있는 컴포넌트 (PetTabBar, PetRegistrationModal)
+│   └── walk/          # 산책 화면 전용 컴포넌트 (펫 컨텍스트·산책 API를 아는 것들, index.ts barrel)
 ├── hooks/             # useAlert, useHardwareBack, useBodyScrollLock, usePullToRefresh
 ├── layouts/           # TabLayout(탭 있음) / PlainLayout(탭 없음)
 ├── pages/             # 화면 단위 컴포넌트
@@ -67,6 +69,7 @@ src/
 │   ├── auth/          # tokenStorage, authService, AuthProvider
 │   ├── image/         # imagePicker (브릿지 PICK_IMAGE + <input type="file"> 폴백)
 │   ├── location/      # 현재 좌표 (브릿지 GET_LOCATION + Geolocation API 폴백)
+│   ├── map/           # 카카오맵 JS SDK 로더 (kakaoMap.ts) — 산책 상세 지도 전용
 │   └── pet/           # PetContext/PetProvider (펫 목록·선택 상태), selectedPetStorage
 ├── utils/             # cn(className 합치기), date, clipboard
 └── index.css          # Tailwind 진입점 + @theme 디자인 토큰 + 모바일 셸 변수/유틸리티
@@ -140,8 +143,11 @@ src/
 | `common/PagedList`                       | `common/item/PagedFlatList.tsx`                | **프로토타입** — IntersectionObserver 무한 스크롤          |
 | `common/MultiImageSelector`              | `common/item/MultiImageSelector.tsx`           | 브릿지 `PICK_IMAGE` + `<input type="file">` 폴백           |
 | `common/modal/BottomSheetModal`          | (각 모달에 흩어져 있던 딤/시트 공통부)         | Esc · 딤 클릭 · 하드웨어 뒤로가기로 닫힘                   |
+| `common/modal/GlobalDetailModal`         | `common/modal/GlobalDetailModal.tsx`           | 고정 높이 바텀시트(산책 상세·알람 관리 등). 드래그해서 닫기는 미구현(BottomSheetModal과 동일하게 딤·Esc·하드웨어 뒤로가기만) |
 | `common/modal/DatePickerModal`           | `common/modal/DatePickerModal.tsx`             | **프로토타입** — OS 기본 피커 미사용                       |
 | `common/modal/TimePickerModal`           | `common/modal/TimePickerModal.tsx`             | **프로토타입** — OS 기본 피커 미사용                       |
+| `common/AddTopBar`                       | `common/item/AddTopBar.tsx`                    | 등록/추가 화면(PlainLayout) 전용 상단 바. 뒤로가기 고정, 앱 아이콘 없음 |
+| `common/PhotoGallery`                    | `common/item/PhotoGallery.tsx`                 | **프로토타입** — 핀치/더블탭 확대 없음(스와이프 + 라이트박스만) |
 
 ## HTTP 클라이언트
 
@@ -168,6 +174,8 @@ src/
 | `petTip`     | `GET /api/v1/pet-tips/random`                                     | `PetTipController`            |
 | `petItem`    | `GET /api/v1/pet-items?petId=` (목록만 — 용품 티켓에서 확장)       | `PetItemController`           |
 | `storage`    | `POST /api/v1/storage/{bucketKind}` (multipart)                   | `StorageController`           |
+| `walk`       | `GET /api/v1/walks`, `GET /api/v1/walks/{walkId}`, `GET /api/v1/walks/calendar`, `POST /api/v1/walks`, `DELETE /api/v1/walks/{walkId}` | `WalkController` |
+| `petWalkAlarm` | `GET/POST/PUT /api/v1/pet-walk-alarms`, `PATCH /api/v1/pet-walk-alarms/status`, `DELETE /api/v1/pet-walk-alarms/{alarmId}` | `PetWalkAlarmController` |
 
 > 업로드 응답은 **이미지 키**이고 조회 응답은 **CloudFront 전체 URL**입니다. 기존 이미지를 그대로
 > 유지할 때는 `extractImageKey(url)`로 키를 되뽑아 보냅니다(네이티브와 같은 방식).

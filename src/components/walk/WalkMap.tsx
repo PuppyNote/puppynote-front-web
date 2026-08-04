@@ -20,20 +20,22 @@ export interface WalkMapProps {
  * 앱 키(`VITE_KAKAO_MAP_APP_KEY`)가 비어 있으면 SDK 로드를 시도조차 하지 않고 바로
  * 안내 문구를 보여줍니다 — 로드는 실패해도 내부적으로 몇 초 걸리는 시도라, 키가 없는 게
  * 뻔한 상황(발급 전 로컬/스테이징)에서 그 대기를 사용자에게 보여줄 이유가 없습니다.
+ * (env 값은 실행 중 바뀌지 않으므로 state 초기값으로만 반영하고, effect 안에서는 이 분기에서
+ * setState를 부르지 않습니다 — 렌더 중 이미 알 수 있는 값이라 effect가 필요 없는 경우입니다.)
  */
+const MAP_KEY_MISSING_MESSAGE = '지도를 표시할 수 없습니다.'
+const hasMapKey = Boolean(import.meta.env.VITE_KAKAO_MAP_APP_KEY)
+
 export default function WalkMap({ latitude, longitude, className }: WalkMapProps) {
   const containerRef = useRef<HTMLDivElement>(null)
-  const [error, setError] = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(hasMapKey ? null : MAP_KEY_MISSING_MESSAGE)
 
   useEffect(() => {
+    if (!hasMapKey) return
+
     let cancelled = false
 
     void (async () => {
-      if (!import.meta.env.VITE_KAKAO_MAP_APP_KEY) {
-        setError('지도를 표시할 수 없습니다.')
-        return
-      }
-
       try {
         const kakaoMaps = await loadKakaoMaps()
         if (cancelled || !containerRef.current) return
