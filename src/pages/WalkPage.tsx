@@ -166,7 +166,7 @@ function WalkCard({ walk, onPress }: WalkCardProps) {
         </span>
       )}
       <div className="min-w-0 flex-1">
-        <p className="truncate text-body-lg font-bold text-ink-900">{walk.location}</p>
+        <p className="truncate text-title-sm font-bold text-ink-900">{walk.location}</p>
         <p className="mt-0.5 text-body text-ink-500">{timeRange}</p>
         {walk.memo && <p className="mt-xs line-clamp-2 text-caption text-ink-400">{walk.memo}</p>}
       </div>

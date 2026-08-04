@@ -36,7 +36,7 @@ export default function AlarmItem({
   return (
     <div className="mb-lg flex items-center justify-between rounded-xl bg-white p-xl shadow-card">
       <button type="button" onClick={() => onPress(id)} className="min-w-0 flex-1 text-left">
-        <p className="mb-sm text-heading font-bold text-ink-900">
+        <p className="mb-sm text-display-sm font-bold text-ink-900">
           {hour}:{minute}
         </p>
         <div className="flex gap-1.5">
