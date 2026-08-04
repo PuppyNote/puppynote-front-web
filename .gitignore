@@ -12,10 +12,11 @@ dist
 dist-ssr
 *.local
 
-# Env (.env.example만 커밋합니다)
+# Env (개인용 .env/.env.local류는 제외, 팀 공용 기본값은 커밋)
 .env
 .env.*
 !.env.example
+!.env.development
 
 # Editor directories and files
 .vscode/*
