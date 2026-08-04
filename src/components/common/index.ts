@@ -2,6 +2,9 @@
  * 공통 컴포넌트 barrel.
  * 화면 코드에서 `import { Card, Badge } from '@/components/common'`처럼 씁니다.
  */
+export { default as AddTopBar } from './AddTopBar'
+export type { AddTopBarProps } from './AddTopBar'
+
 export { default as Badge } from './Badge'
 export type { BadgeProps, BadgeVariant } from './Badge'
 
@@ -22,6 +25,9 @@ export type { PagedListProps, PageResult } from './PagedList'
 
 export { default as PetTab } from './PetTab'
 export type { PetTabProps, PetSummary } from './PetTab'
+
+export { default as PhotoGallery } from './PhotoGallery'
+export type { PhotoGalleryProps } from './PhotoGallery'
 
 export { default as PlaceholderPage } from './PlaceholderPage'
 
@@ -44,6 +50,9 @@ export type { CustomAlertProps } from './modal/CustomAlert'
 
 export { default as DatePickerModal } from './modal/DatePickerModal'
 export type { DatePickerModalProps } from './modal/DatePickerModal'
+
+export { default as GlobalDetailModal } from './modal/GlobalDetailModal'
+export type { GlobalDetailModalProps } from './modal/GlobalDetailModal'
 
 export { default as PickerConfirmButton } from './modal/PickerConfirmButton'
 export type { PickerConfirmButtonProps } from './modal/PickerConfirmButton'

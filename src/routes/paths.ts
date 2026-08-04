@@ -7,6 +7,7 @@
 export const ROUTES = {
   HOME: '/',
   WALK: '/walk',
+  ADD_WALK: '/walk/add',
   SUPPLIES: '/supplies',
   COMMUNITY: '/community',
   FOOD: '/food',

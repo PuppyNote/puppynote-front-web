@@ -2,6 +2,7 @@ import { createBrowserRouter, type RouteObject } from 'react-router-dom'
 
 import PlainLayout from '@/layouts/PlainLayout'
 import TabLayout from '@/layouts/TabLayout'
+import AddWalkPage from '@/pages/AddWalkPage'
 import CommunityPage from '@/pages/CommunityPage'
 import DesignSystemPage from '@/pages/DesignSystemPage'
 import FoodPage from '@/pages/FoodPage'
@@ -66,6 +67,11 @@ export const router = createBrowserRouter([
               { path: ROUTES.FOOD, element: <FoodPage /> },
               { path: ROUTES.SETTINGS, element: <SettingsPage /> },
             ],
+          },
+          {
+            // 하단 탭 없이 뒤로가기 헤더만 있는 등록/추가 화면들 (네이티브 스택 화면에 대응)
+            element: <PlainLayout />,
+            children: [{ path: ROUTES.ADD_WALK, element: <AddWalkPage /> }],
           },
         ],
       },

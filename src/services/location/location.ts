@@ -16,6 +16,14 @@ export interface Coordinates {
   longitude: number
 }
 
+export interface CoordinatesWithAddress extends Coordinates {
+  /**
+   * 역지오코딩 주소. 브릿지가 지원하고 `reverseGeocode: true`를 넘겼을 때만 채워집니다.
+   * 웹 표준 Geolocation 폴백 경로는 역지오코딩 수단이 없어 항상 null입니다.
+   */
+  address: string | null
+}
+
 /** 브릿지 대신 웹 Geolocation으로 폴백해야 하는 에러인지 (구버전 앱 등) */
 const FALLBACK_ERROR_CODES: string[] = [
   BridgeErrorCode.NO_BRIDGE,
@@ -37,12 +45,22 @@ const WEB_GEOLOCATION_OPTIONS: PositionOptions = {
  * 호출부에서 조용히 무시하고 해당 UI만 감추면 됩니다.
  */
 export async function getCurrentCoordinates(): Promise<Coordinates> {
+  const { latitude, longitude } = await getCurrentPosition()
+  return { latitude, longitude }
+}
+
+/**
+ * 현재 좌표 + (가능하면) 주소를 가져옵니다. 산책 기록 추가 화면처럼 장소 입력칸을
+ * 자동으로 채워주고 싶을 때 씁니다. 주소가 없으면 사용자가 직접 입력하면 됩니다.
+ */
+export async function getCurrentPosition(): Promise<CoordinatesWithAddress> {
   if (isInApp() && isActionSupported(BridgeAction.GET_LOCATION)) {
     try {
       const data = await requestBridge<LocationData>(BridgeAction.GET_LOCATION, {
         accuracy: 'balanced',
+        reverseGeocode: true,
       })
-      return { latitude: data.latitude, longitude: data.longitude }
+      return { latitude: data.latitude, longitude: data.longitude, address: data.address ?? null }
     } catch (error) {
       const code = error instanceof BridgeError ? error.code : null
       if (!code || !FALLBACK_ERROR_CODES.includes(code)) throw error
@@ -53,7 +71,7 @@ export async function getCurrentCoordinates(): Promise<Coordinates> {
   return getViaWebGeolocation()
 }
 
-function getViaWebGeolocation(): Promise<Coordinates> {
+function getViaWebGeolocation(): Promise<CoordinatesWithAddress> {
   if (typeof navigator === 'undefined' || !navigator.geolocation) {
     throw new Error('이 브라우저에서는 위치 정보를 사용할 수 없습니다.')
   }
@@ -64,6 +82,8 @@ function getViaWebGeolocation(): Promise<Coordinates> {
         resolve({
           latitude: position.coords.latitude,
           longitude: position.coords.longitude,
+          // 웹 표준 Geolocation은 역지오코딩을 제공하지 않습니다.
+          address: null,
         }),
       (error) => reject(new Error(toGeolocationMessage(error))),
       WEB_GEOLOCATION_OPTIONS,

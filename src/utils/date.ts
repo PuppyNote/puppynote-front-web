@@ -10,6 +10,11 @@ export function formatToLocalDate(date: Date): string {
   return `${year}-${month}-${day}`
 }
 
+/** `YYYY-MM` (산책 캘린더 월 단위 조회에 씁니다). `month`는 1~12입니다. */
+export function formatToLocalYearMonth(year: number, month: number): string {
+  return `${year}-${String(month).padStart(2, '0')}`
+}
+
 /**
  * 두 날짜의 일수 차이 (target - base). 미래면 양수, 과거면 음수입니다.
  * 시각은 버리고 날짜만 비교합니다.
