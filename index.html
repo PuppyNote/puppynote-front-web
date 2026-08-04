@@ -18,7 +18,9 @@
     <!--
       카카오맵 JS SDK. `autoload=false`는 지도를 쓰는 화면(산책 상세)에 들어가기 전까지
       초기화를 미루기 위해서입니다 — 실제 로드는 `src/services/map/kakaoMap.ts`가 담당합니다.
-      %VITE_KAKAO_MAP_APP_KEY%는 Vite가 빌드/개발 서버 기동 시 .env 값으로 치환합니다.
+      아래 appkey 자리는 .env의 VITE_KAKAO_MAP_APP_KEY 값으로 Vite가 치환합니다.
+      (주의: Vite의 HTML env 치환은 `%NAME%` 형태를 파일 전체에서 찾아 바꾸므로, 이 주석에는
+      그 형태를 그대로 적지 않습니다.)
     -->
     <script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=%VITE_KAKAO_MAP_APP_KEY%&autoload=false"></script>
   </head>
