@@ -280,12 +280,15 @@ const { latitude, longitude, address } = await getCurrentPosition()
 | 홈                         | 완료     | `screens/home/HomeScreen.tsx`                    |
 | 반려동물 등록/관리         | 완료     | `common/modal/PetRegistrationModal.tsx`, `common/item/PetTab.tsx` |
 | 산책 (관리/기록추가/상세/알람) | 완료 | `screens/walk/*`, `components/walk/*`            |
-| 용품 / 커뮤니티 / 음식 / 설정 | 예정   | `screens/supply|community|food|setting/*`        |
+| 용품 (목록/등록/카테고리/구매내역) | 완료 | `screens/supply/*`                          |
+| 커뮤니티 (목록/상세/글쓰기/내 게시물) | 완료 | `screens/community/*`                    |
+| 음식 / AI 문답             | 완료     | `screens/food/FoodScreen.tsx`                    |
+| 설정 / 프로필 / 가족 관리 / 알림 | 완료 | `screens/setting/*`, `screens/notification/*` |
+
+기획서상 MVP 범위(Phase1) 전 화면 이식 완료.
 
 ## 다음 단계 (후속 티켓)
 
-- 남은 화면 이식 (`src/pages/*`의 PlaceholderPage 교체)
-- 용품 화면 이식 시 `endpoints/petItem.ts`에 등록/수정/삭제·구매 이력 추가
-- 가족 관리 화면 이식 시 `PET_TAB_ROUTES`에 경로 추가
-- 알림 서비스 이식 후 `TopBar`의 미확인 알림 표시·이동 연결
+- 디바이스 푸시 토큰 서버 등록: `puppynote-server`에 등록 API가 아직 없어
+  `AuthProvider.finishLogin`에 TODO만 남겨둠 (브릿지로 토큰을 가져오는 부분은 완료)
 - `WheelPicker`/`PagedList` 완성도 보강 (휠 원근 효과, 목록 가상 스크롤)
