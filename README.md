@@ -249,6 +249,29 @@ const { latitude, longitude } = await getCurrentCoordinates()
 Geolocation API를 씁니다. 권한 거부 등은 예외로 던지므로, 호출부에서 해당 UI만 감추면 됩니다
 (홈 날씨 위젯이 그렇게 동작합니다).
 
+주소까지 함께 필요하면(예: 산책 기록 추가의 장소 자동입력) `getCurrentPosition()`을 씁니다.
+
+```ts
+const { latitude, longitude, address } = await getCurrentPosition()
+```
+
+앱 브릿지에는 `reverseGeocode: true`를 함께 넘겨 주소를 받아오지만, 웹 표준 Geolocation
+폴백 경로는 역지오코딩 수단이 없어 `address`가 항상 `null`입니다 — 그 경우 사용자가 직접
+입력합니다.
+
+## 지도 (카카오맵)
+
+`src/services/map/kakaoMap.ts`가 카카오맵 JS SDK 로더입니다. 네이티브 `react-native-maps`에
+대응하는 웹 표준이 없어서, `puppymap-front-web`과 동일하게 카카오맵을 씁니다.
+
+- SDK `<script>` 태그는 `index.html`에 `autoload=false`로 미리 넣어 두었고, 앱키는
+  `%VITE_KAKAO_MAP_APP_KEY%` 자리에 Vite가 빌드/개발 서버 기동 시 치환합니다
+- 실제 초기화(`kakao.maps.load`)는 지도를 쓰는 화면에 들어갈 때만 `loadKakaoMaps()`가 수행합니다
+- 이 앱에서 지도를 쓰는 곳은 산책 상세(`components/walk/WalkMap.tsx`) 한 곳뿐이고, 마커 하나만
+  찍습니다 — 네이티브 원본도 좌표 하나(`WalkDetail.latitude/longitude`)만 저장/조회해서 경로
+  (폴리라인) 데이터 자체가 없습니다
+- `VITE_KAKAO_MAP_APP_KEY`가 비어 있으면 지도 영역이 안내 문구로 대체됩니다 (에러가 아닙니다)
+
 ## 화면 이식 현황
 
 | 화면                       | 상태     | 네이티브 원본                                    |
@@ -256,7 +279,8 @@ Geolocation API를 씁니다. 권한 거부 등은 예외로 던지므로, 호�
 | 로그인 / 회원가입 / 비번찾기 | 완료     | `screens/login/*`                                |
 | 홈                         | 완료     | `screens/home/HomeScreen.tsx`                    |
 | 반려동물 등록/관리         | 완료     | `common/modal/PetRegistrationModal.tsx`, `common/item/PetTab.tsx` |
-| 산책 / 용품 / 커뮤니티 / 음식 / 설정 | 예정 | `screens/walk|supply|community|food|setting/*` |
+| 산책 (관리/기록추가/상세/알람) | 완료 | `screens/walk/*`, `components/walk/*`            |
+| 용품 / 커뮤니티 / 음식 / 설정 | 예정   | `screens/supply|community|food|setting/*`        |
 
 ## 다음 단계 (후속 티켓)
 
