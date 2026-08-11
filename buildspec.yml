@@ -1,0 +1,28 @@
+version: 0.2
+
+env:
+  parameter-store:
+    # 빌드 타임 환경변수 (Vite는 빌드 시점에 값을 번들에 인라인하므로 build phase에서 주입)
+    VITE_API_URL: "/puppynote/prd/VITE_API_URL"
+    VITE_KAKAO_MAP_APP_KEY: "/puppynote/prd/VITE_KAKAO_MAP_APP_KEY"
+
+phases:
+  install:
+    runtime-versions:
+      nodejs: 20
+  build:
+    commands:
+      - echo "--- npm 의존성 설치 ---"
+      - npm ci
+      - echo "--- 빌드 시점 환경변수 주입 (.env.production, git 미추적) ---"
+      - echo "VITE_API_URL=$VITE_API_URL" > .env.production
+      - echo "VITE_KAKAO_MAP_APP_KEY=$VITE_KAKAO_MAP_APP_KEY" >> .env.production
+      - echo "--- 타입 체크 + 프로덕션 빌드 ---"
+      - npm run build
+
+artifacts:
+  files:
+    - dist/**/*
+    - appspec.yml
+    - scripts/**/*
+  discard-paths: no

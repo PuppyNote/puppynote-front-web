@@ -1,0 +1,24 @@
+version: 0.0
+os: linux
+files:
+  - source: dist/
+    destination: /home/ec2-user/app-web/dist
+permissions:
+  - object: /home/ec2-user/app-web/
+    owner: ec2-user
+    group: ec2-user
+hooks:
+  ApplicationStart:
+    - location: scripts/start.sh      # 비활성 포트에 새 버전 정적 서버 실행
+      timeout: 60
+      runas: ec2-user
+  ValidateService:
+    - location: scripts/health.sh     # 새 버전 헬스체크
+      timeout: 60
+      runas: ec2-user
+    - location: scripts/switch.sh     # Nginx 트래픽 전환
+      timeout: 30
+      runas: root
+    - location: scripts/stop.sh       # 구버전 프로세스 종료
+      timeout: 60
+      runas: ec2-user
