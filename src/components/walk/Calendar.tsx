@@ -120,12 +120,11 @@ export default function Calendar({
             >
               <span
                 className={cn(
-                  'flex size-8 items-center justify-center rounded-full border-2 border-transparent text-body font-medium text-ink-700',
-                  !isToday && hasWalk && 'bg-amber-50',
-                  isSelected && 'border-brand',
-                  isToday && 'border-brand bg-brand text-white font-bold',
-                  !isToday && hasWalk && 'font-bold text-brand',
-                  isSelected && 'font-bold text-brand',
+                  'flex size-8 items-center justify-center rounded-full border-2 text-body',
+                  isToday ? 'bg-brand' : hasWalk ? 'bg-amber-50' : '',
+                  isToday || isSelected ? 'border-brand' : 'border-transparent',
+                  isToday ? 'text-white' : hasWalk || isSelected ? 'text-brand' : 'text-ink-700',
+                  isToday || hasWalk || isSelected ? 'font-bold' : 'font-medium',
                 )}
               >
                 {day}
