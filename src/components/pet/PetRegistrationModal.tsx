@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 
-import { CustomAlert, DatePickerModal, Spinner } from '@/components/common'
+import { CustomAlert, DatePickerModal, ImageSourceSheet, Spinner } from '@/components/common'
 import { useAlert } from '@/hooks/useAlert'
 import { useBodyScrollLock } from '@/hooks/useBodyScrollLock'
 import { useHardwareBack } from '@/hooks/useHardwareBack'
@@ -9,7 +9,7 @@ import { homeApi } from '@/services/api/endpoints/home'
 import { petApi } from '@/services/api/endpoints/pet'
 import { extractImageKey, storageApi } from '@/services/api/endpoints/storage'
 import { toErrorMessage } from '@/services/api/types'
-import { pickImages, type PickedWebImage } from '@/services/image/imagePicker'
+import type { PickedWebImage } from '@/services/image/imagePicker'
 import { cn } from '@/utils/cn'
 
 export interface PetRegistrationModalProps {
@@ -102,6 +102,7 @@ function PetRegistrationForm({ editPetId, onClose, onSuccess }: PetRegistrationF
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isDataLoading, setIsDataLoading] = useState(isEditMode)
   const [isDatePickerOpen, setIsDatePickerOpen] = useState(false)
+  const [isImageSourceOpen, setIsImageSourceOpen] = useState(false)
   const { alert, showSimpleAlert, hideAlert } = useAlert()
 
   // 수정 모드 초기값. 펫 단건 조회 API가 없어 홈 정보를 재사용합니다(네이티브와 동일).
@@ -130,16 +131,11 @@ function PetRegistrationForm({ editPetId, onClose, onSuccess }: PetRegistrationF
     }
   }, [editPetId])
 
-  const handlePickImage = async () => {
-    try {
-      const [picked] = await pickImages({ max: 1 })
-      // 취소하면 빈 배열이 옵니다. 이때는 기존 이미지를 그대로 둡니다.
-      if (!picked) return
-      setPickedImage(picked)
-      setImageSrc(picked.src)
-    } catch (error) {
-      showSimpleAlert('오류', toErrorMessage(error, '이미지를 불러오지 못했습니다.'))
-    }
+  const handleImagePicked = (images: PickedWebImage[]) => {
+    const [picked] = images
+    if (!picked) return
+    setPickedImage(picked)
+    setImageSrc(picked.src)
   }
 
   const handleSubmit = async () => {
@@ -209,7 +205,7 @@ function PetRegistrationForm({ editPetId, onClose, onSuccess }: PetRegistrationF
 
       <button
         type="button"
-        onClick={handlePickImage}
+        onClick={() => setIsImageSourceOpen(true)}
         aria-label="프로필 사진 선택"
         className="mx-auto mb-2xl flex size-[100px] items-center justify-center overflow-hidden rounded-full border border-dashed border-ink-200 bg-ink-100"
       >
@@ -300,6 +296,13 @@ function PetRegistrationForm({ editPetId, onClose, onSuccess }: PetRegistrationF
         onClose={() => setIsDatePickerOpen(false)}
         onConfirm={setBirthDate}
         initialDate={birthDate}
+      />
+
+      <ImageSourceSheet
+        open={isImageSourceOpen}
+        onClose={() => setIsImageSourceOpen(false)}
+        onPicked={handleImagePicked}
+        onError={(message) => showSimpleAlert('오류', message)}
       />
 
       <CustomAlert alert={alert} onClose={hideAlert} />

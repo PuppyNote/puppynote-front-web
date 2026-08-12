@@ -75,7 +75,13 @@ export default function PhotoGallery({
             }
             className="h-full w-full shrink-0 snap-center"
           >
-            <img src={url} alt="" className="size-full object-cover" />
+            <img
+              src={url}
+              alt=""
+              loading="lazy"
+              decoding="async"
+              className="size-full object-cover"
+            />
           </button>
         ))}
       </div>
@@ -163,7 +169,13 @@ function Lightbox({ photoUrls, initialIndex, onClose }: LightboxProps) {
             key={url + photoIndex}
             className="flex h-full w-full shrink-0 snap-center items-center justify-center"
           >
-            <img src={url} alt="" className="max-h-full max-w-full object-contain" />
+            <img
+              src={url}
+              alt=""
+              loading="lazy"
+              decoding="async"
+              className="max-h-full max-w-full object-contain"
+            />
           </div>
         ))}
       </div>

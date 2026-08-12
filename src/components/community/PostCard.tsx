@@ -43,6 +43,8 @@ export default function PostCard({ post, onPress, onHashtagPress }: PostCardProp
           <img
             src={post.userProfileUrl || '/assets/puppynote-icon.png'}
             alt=""
+            loading="lazy"
+            decoding="async"
             className="size-10 shrink-0 rounded-full bg-ink-100 object-cover"
           />
           <div className="ml-md min-w-0">

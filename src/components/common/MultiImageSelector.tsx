@@ -1,7 +1,7 @@
 import { useState } from 'react'
 
-import { Spinner } from './icons'
-import { type PickedWebImage, pickImages } from '@/services/image/imagePicker'
+import ImageSourceSheet from './modal/ImageSourceSheet'
+import type { PickedWebImage } from '@/services/image/imagePicker'
 import { cn } from '@/utils/cn'
 
 export interface MultiImageSelectorProps {
@@ -21,8 +21,8 @@ export interface MultiImageSelectorProps {
 /**
  * 네이티브 `components/common/item/MultiImageSelector.tsx` 이식.
  *
- * 선택 경로는 {@link pickImages}가 감춥니다. 앱 안에서는 브릿지 `PICK_IMAGE`,
- * 일반 브라우저에서는 `<input type="file">`을 쓰지만 이 컴포넌트는 그 차이를 모릅니다.
+ * `+` 버튼을 누르면 {@link ImageSourceSheet}(갤러리/카메라 선택 액션시트)가 뜨고,
+ * 고른 쪽을 표준 `<input type="file" capture>`로 바로 엽니다.
  *
  * 이미지 한 장은 `PickedWebImage`이고 `src`(dataUrl 또는 URL)를 그대로 미리보기와 업로드에
  * 씁니다. 나중에 앱이 직접 업로드하는 `UPLOAD_IMAGE` 액션이 생겨도 `src`가 URL로 바뀔 뿐이라
@@ -36,34 +36,27 @@ export default function MultiImageSelector({
   disabled = false,
   className,
 }: MultiImageSelectorProps) {
-  const [isPicking, setIsPicking] = useState(false)
+  const [isImageSourceOpen, setIsImageSourceOpen] = useState(false)
 
   const reportError = (message: string) => {
     if (onError) onError(message)
     else console.warn('[MultiImageSelector]', message)
   }
 
-  const handlePick = async () => {
-    if (isPicking || disabled) return
+  const remaining = maxCount - images.length
 
-    const remaining = maxCount - images.length
+  const handlePick = () => {
+    if (disabled) return
     if (remaining <= 0) {
       reportError(`이미지는 최대 ${maxCount}개까지 등록 가능합니다.`)
       return
     }
+    setIsImageSourceOpen(true)
+  }
 
-    setIsPicking(true)
-    try {
-      const picked = await pickImages({ max: remaining })
-      // 취소하면 빈 배열이 옵니다. 이때는 아무 일도 일어나지 않아야 합니다.
-      if (picked.length > 0) onChange([...images, ...picked])
-    } catch (caught) {
-      reportError(
-        caught instanceof Error ? caught.message : '이미지를 불러오는 중 오류가 발생했습니다.',
-      )
-    } finally {
-      setIsPicking(false)
-    }
+  const handlePicked = (picked: PickedWebImage[]) => {
+    // 취소하면 빈 배열이 옵니다. 이때는 아무 일도 일어나지 않아야 합니다.
+    if (picked.length > 0) onChange([...images, ...picked])
   }
 
   const handleRemove = (id: string) => {
@@ -76,23 +69,17 @@ export default function MultiImageSelector({
         <div className="flex w-max gap-md pr-2xl">
           <button
             type="button"
-            onClick={() => void handlePick()}
-            disabled={disabled || isPicking}
+            onClick={handlePick}
+            disabled={disabled}
             aria-label={`이미지 추가 (${images.length}/${maxCount})`}
             className="flex size-20 shrink-0 flex-col items-center justify-center rounded-lg border border-dashed border-ink-200 bg-white disabled:opacity-60"
           >
-            {isPicking ? (
-              <Spinner className="size-6" />
-            ) : (
-              <>
-                <span aria-hidden className="text-heading leading-none font-light text-ink-400">
-                  +
-                </span>
-                <span className="mt-0.5 text-caption-xs font-bold text-ink-400">
-                  {images.length}/{maxCount}
-                </span>
-              </>
-            )}
+            <span aria-hidden className="text-heading leading-none font-light text-ink-400">
+              +
+            </span>
+            <span className="mt-0.5 text-caption-xs font-bold text-ink-400">
+              {images.length}/{maxCount}
+            </span>
           </button>
 
           {images.map((image) => (
@@ -118,6 +105,14 @@ export default function MultiImageSelector({
           ))}
         </div>
       </div>
+
+      <ImageSourceSheet
+        open={isImageSourceOpen}
+        onClose={() => setIsImageSourceOpen(false)}
+        onPicked={handlePicked}
+        onError={reportError}
+        max={remaining}
+      />
     </div>
   )
 }

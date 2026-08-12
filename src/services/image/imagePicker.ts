@@ -85,6 +85,23 @@ export async function pickImages(options: PickImagesOptions = {}): Promise<Picke
   return pickViaFileInput(max, quality, maxDimension)
 }
 
+export type ImageSource = 'gallery' | 'camera'
+
+/**
+ * 갤러리/카메라 중 사용자가 고른 쪽으로 바로 엽니다. 앱 브릿지(PICK_IMAGE)는 거치지 않고
+ * 표준 `<input type="file" capture>`만 씁니다 — 브라우저/WebView가 갤러리 또는 카메라를
+ * 직접 열어주는 표준 동작에 맡깁니다.
+ */
+export async function pickImagesFromSource(
+  source: ImageSource,
+  options: PickImagesOptions = {},
+): Promise<PickedWebImage[]> {
+  const { max = 1, quality = 0.8, maxDimension = 1600 } = options
+  if (max <= 0) return []
+
+  return pickViaFileInput(max, quality, maxDimension, source === 'camera' ? 'environment' : undefined)
+}
+
 // ---------------------------------------------------------------------------
 // 앱 경로
 // ---------------------------------------------------------------------------
@@ -128,12 +145,14 @@ function pickViaFileInput(
   max: number,
   quality: number,
   maxDimension: number,
+  capture?: 'user' | 'environment',
 ): Promise<PickedWebImage[]> {
   return new Promise((resolve, reject) => {
     const input = document.createElement('input')
     input.type = 'file'
     input.accept = 'image/*'
     input.multiple = max > 1
+    if (capture) input.capture = capture
     input.style.display = 'none'
 
     let settled = false

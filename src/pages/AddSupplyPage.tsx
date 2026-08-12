@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 
-import { AddTopBar, CustomAlert, Spinner } from '@/components/common'
+import { AddTopBar, CustomAlert, ImageSourceSheet, Spinner } from '@/components/common'
 import CyclePickerModal from '@/components/supply/CyclePickerModal'
 import UserCategoryPickerModal from '@/components/supply/UserCategoryPickerModal'
 import { useAlert } from '@/hooks/useAlert'
@@ -12,7 +12,7 @@ import {
   userItemCategoryApi,
   type UserCategoryResponse,
 } from '@/services/api/endpoints/userItemCategory'
-import { pickImages, type PickedWebImage } from '@/services/image/imagePicker'
+import type { PickedWebImage } from '@/services/image/imagePicker'
 import { usePet } from '@/services/pet/PetContext'
 import { cn } from '@/utils/cn'
 
@@ -38,6 +38,7 @@ export default function AddSupplyPage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isCycleModalOpen, setIsCycleModalOpen] = useState(false)
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false)
+  const [isImageSourceOpen, setIsImageSourceOpen] = useState(false)
 
   useEffect(() => {
     void (async () => {
@@ -65,15 +66,11 @@ export default function AddSupplyPage() {
     })()
   }, [isEditMode, editItemId, showSimpleAlert])
 
-  const handlePickImage = async () => {
-    try {
-      const [picked] = await pickImages({ max: 1 })
-      if (!picked) return
-      setPickedImage(picked)
-      setImageSrc(picked.src)
-    } catch (error) {
-      showSimpleAlert('오류', toErrorMessage(error, '이미지를 불러오지 못했습니다.'))
-    }
+  const handleImagePicked = (images: PickedWebImage[]) => {
+    const [picked] = images
+    if (!picked) return
+    setPickedImage(picked)
+    setImageSrc(picked.src)
   }
 
   const handleSave = async () => {
@@ -148,7 +145,7 @@ export default function AddSupplyPage() {
         <div className="flex justify-center py-3xl">
           <button
             type="button"
-            onClick={() => void handlePickImage()}
+            onClick={() => setIsImageSourceOpen(true)}
             className="flex size-28 items-center justify-center overflow-hidden rounded-2xl border-2 border-dashed border-ink-200 bg-white shadow-card"
           >
             {imageSrc ? (
@@ -258,6 +255,13 @@ export default function AddSupplyPage() {
         onConfirm={setSelectedCategory}
         userCategories={userCategories}
         initialCategory={selectedCategory?.category}
+      />
+
+      <ImageSourceSheet
+        open={isImageSourceOpen}
+        onClose={() => setIsImageSourceOpen(false)}
+        onPicked={handleImagePicked}
+        onError={(message) => showSimpleAlert('오류', message)}
       />
 
       <CustomAlert alert={alert} onClose={hideAlert} />

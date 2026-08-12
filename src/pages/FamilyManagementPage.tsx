@@ -178,6 +178,8 @@ export default function FamilyManagementPage() {
                     <img
                       src={searched.profileUrl}
                       alt=""
+                      loading="lazy"
+                      decoding="async"
                       className="size-11 shrink-0 rounded-full object-cover"
                     />
                   ) : (
@@ -224,6 +226,8 @@ export default function FamilyManagementPage() {
                     <img
                       src={member.profileUrl}
                       alt=""
+                      loading="lazy"
+                      decoding="async"
                       className="size-14 shrink-0 rounded-full object-cover"
                     />
                   ) : (

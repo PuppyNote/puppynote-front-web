@@ -241,6 +241,8 @@ export default function HomePage() {
                         <img
                           src={homeInfo.petProfileImageUrl}
                           alt=""
+                          loading="lazy"
+                          decoding="async"
                           className="size-full object-cover"
                         />
                       ) : (

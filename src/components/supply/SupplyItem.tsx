@@ -26,7 +26,13 @@ export default function SupplyItem({
       className="mb-lg flex w-full items-center gap-lg rounded-lg border border-ink-100 bg-white p-lg text-left shadow-card"
     >
       {image ? (
-        <img src={image} alt="" className="size-16 shrink-0 rounded-md object-cover" />
+        <img
+          src={image}
+          alt=""
+          loading="lazy"
+          decoding="async"
+          className="size-16 shrink-0 rounded-md object-cover"
+        />
       ) : (
         <span className="flex size-16 shrink-0 items-center justify-center rounded-md bg-ink-100 text-heading">
           🦴

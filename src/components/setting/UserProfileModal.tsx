@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 
-import { CustomAlert, Spinner } from '@/components/common'
+import { CustomAlert, ImageSourceSheet, Spinner } from '@/components/common'
 import { useAlert } from '@/hooks/useAlert'
 import { useBodyScrollLock } from '@/hooks/useBodyScrollLock'
 import { useHardwareBack } from '@/hooks/useHardwareBack'
@@ -9,7 +9,7 @@ import { storageApi } from '@/services/api/endpoints/storage'
 import { toErrorMessage } from '@/services/api/types'
 import type { UserProfile } from '@/services/api/endpoints/user'
 import { userApi } from '@/services/api/endpoints/user'
-import { pickImages, type PickedWebImage } from '@/services/image/imagePicker'
+import type { PickedWebImage } from '@/services/image/imagePicker'
 import { cn } from '@/utils/cn'
 
 import WithdrawalModal from './WithdrawalModal'
@@ -70,17 +70,14 @@ function ProfileForm({ initialData, onClose, onSuccess }: ProfileFormProps) {
   const [pickedImage, setPickedImage] = useState<PickedWebImage | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isWithdrawOpen, setIsWithdrawOpen] = useState(false)
+  const [isImageSourceOpen, setIsImageSourceOpen] = useState(false)
   const { alert, showSimpleAlert, hideAlert } = useAlert()
 
-  const handlePickImage = async () => {
-    try {
-      const [picked] = await pickImages({ max: 1 })
-      if (!picked) return
-      setPickedImage(picked)
-      setImageSrc(picked.src)
-    } catch (error) {
-      showSimpleAlert('오류', toErrorMessage(error, '이미지를 불러오지 못했습니다.'))
-    }
+  const handleImagePicked = (images: PickedWebImage[]) => {
+    const [picked] = images
+    if (!picked) return
+    setPickedImage(picked)
+    setImageSrc(picked.src)
   }
 
   const handleSubmit = async () => {
@@ -113,7 +110,7 @@ function ProfileForm({ initialData, onClose, onSuccess }: ProfileFormProps) {
 
       <button
         type="button"
-        onClick={() => void handlePickImage()}
+        onClick={() => setIsImageSourceOpen(true)}
         aria-label="프로필 사진 선택"
         className="mx-auto mb-2xl flex size-[100px] items-center justify-center overflow-hidden rounded-full border border-dashed border-ink-200 bg-ink-100"
       >
@@ -179,6 +176,13 @@ function ProfileForm({ initialData, onClose, onSuccess }: ProfileFormProps) {
       </div>
 
       <WithdrawalModal open={isWithdrawOpen} onClose={() => setIsWithdrawOpen(false)} />
+
+      <ImageSourceSheet
+        open={isImageSourceOpen}
+        onClose={() => setIsImageSourceOpen(false)}
+        onPicked={handleImagePicked}
+        onError={(message) => showSimpleAlert('오류', message)}
+      />
 
       <CustomAlert alert={alert} onClose={hideAlert} />
     </>

@@ -159,7 +159,13 @@ function WalkCard({ walk, onPress }: WalkCardProps) {
       className="mb-2xl flex w-full gap-lg rounded-lg bg-white p-lg text-left shadow-card"
     >
       {walk.photoUrl ? (
-        <img src={walk.photoUrl} alt="" className="size-16 shrink-0 rounded-sm object-cover" />
+        <img
+          src={walk.photoUrl}
+          alt=""
+          loading="lazy"
+          decoding="async"
+          className="size-16 shrink-0 rounded-sm object-cover"
+        />
       ) : (
         <span className="flex size-16 shrink-0 items-center justify-center rounded-sm bg-ink-100 text-heading">
           🐕

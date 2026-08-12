@@ -109,6 +109,8 @@ export default function CommunityDetailPage() {
           <img
             src={post.userProfileUrl || '/assets/puppynote-icon.png'}
             alt=""
+            loading="lazy"
+            decoding="async"
             className="size-12 shrink-0 rounded-full bg-ink-100 object-cover"
           />
           <div className="ml-lg min-w-0">
