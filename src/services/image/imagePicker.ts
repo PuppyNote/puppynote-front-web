@@ -151,7 +151,10 @@ function pickViaFileInput(
     const input = document.createElement('input')
     input.type = 'file'
     input.accept = 'image/*'
-    input.multiple = max > 1
+    // capture와 multiple을 같이 주면 일부 브라우저/WebView(예: Android Chrome 계열)가
+    // capture를 무시하고 카메라 대신 일반 파일 선택창을 띄운다. 카메라는 한 번에 한 장만
+    // 찍을 수 있어 multiple이 애초에 의미가 없으므로, capture일 때는 항상 false로 둔다.
+    input.multiple = capture ? false : max > 1
     if (capture) input.capture = capture
     input.style.display = 'none'
 
