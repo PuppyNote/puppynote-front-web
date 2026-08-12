@@ -85,8 +85,10 @@ export default function WalkAlarmTimePicker({
             onClick={() => toggleDay(day.id)}
             aria-pressed={days.includes(day.id)}
             className={cn(
-              'flex size-9 items-center justify-center rounded-full border border-ink-100 bg-ink-50 text-caption font-semibold text-ink-500',
-              days.includes(day.id) && 'border-brand bg-brand text-ink-900',
+              'flex size-9 items-center justify-center rounded-full border text-caption font-semibold',
+              days.includes(day.id)
+                ? 'border-brand bg-brand text-ink-900'
+                : 'border-ink-100 bg-ink-50 text-ink-500',
             )}
           >
             {day.label}

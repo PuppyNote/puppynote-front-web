@@ -44,8 +44,8 @@ export default function AlarmItem({
             <span
               key={day}
               className={cn(
-                'text-caption font-semibold text-ink-300',
-                days.includes(day) && 'text-brand',
+                'text-caption font-semibold',
+                days.includes(day) ? 'text-brand' : 'text-ink-300',
               )}
             >
               {DAY_LABELS[day]}

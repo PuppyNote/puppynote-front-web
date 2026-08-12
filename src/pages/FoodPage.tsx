@@ -7,10 +7,13 @@ import { foodApi, type FoodItem } from '@/services/api/endpoints/food'
 import { isApiError } from '@/services/api/types'
 import { cn } from '@/utils/cn'
 
-const SAFETY_INFO: Record<FoodItem['safetyLevel'], { border: string; bg: string; icon: string; label: string }> = {
-  GOOD: { border: 'border-success', bg: 'bg-success-bg', icon: '🐾', label: '안전' },
-  NOTION: { border: 'border-warning', bg: 'bg-warning-bg', icon: '⚠️', label: '주의' },
-  BAD: { border: 'border-error', bg: 'bg-error-bg', icon: '🚨', label: '위험' },
+const SAFETY_INFO: Record<
+  FoodItem['safetyLevel'],
+  { borderColor: string; bg: string; icon: string; label: string }
+> = {
+  GOOD: { borderColor: 'var(--color-success)', bg: 'bg-success-bg', icon: '🐾', label: '안전' },
+  NOTION: { borderColor: 'var(--color-warning)', bg: 'bg-warning-bg', icon: '⚠️', label: '주의' },
+  BAD: { borderColor: 'var(--color-error)', bg: 'bg-error-bg', icon: '🚨', label: '위험' },
 }
 
 /** 마크다운 태그를 네이티브 `markdownStyles`와 같은 톤으로. */
@@ -35,7 +38,17 @@ function FoodCard({ item, initialExpanded = false }: { item: FoodItem; initialEx
       onClick={() => setExpanded((prev) => !prev)}
       className="block w-full text-left"
     >
-      <Card className={cn('mb-lg rounded-3xl border-2 p-xl', status.border)}>
+      {/*
+        border 색은 Tailwind 클래스(예: border-error) 대신 style로 직접 줍니다.
+        Card 기본 클래스에 이미 border-ink-100이 있어서, cn()은 병합(merge) 없이 그냥
+        이어붙이기만 하다 보니 두 border-color 클래스가 동시에 붙고 최종 색은 클래스
+        선언 순서가 아니라 컴파일된 CSS의 등장 순서로 정해집니다. success/warning은
+        우연히 순서가 맞아 보였지만 error는 반대로 밀려 항상 회색 테두리로 덮였습니다.
+      */}
+      <Card
+        className="mb-lg rounded-3xl border-2 p-xl"
+        style={{ borderColor: status.borderColor }}
+      >
         <div className="flex items-center justify-between">
           <div className="mr-md min-w-0 flex-1">
             <p className="mb-xs text-caption font-bold text-ink-500">{status.label}</p>
