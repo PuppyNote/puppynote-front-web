@@ -156,7 +156,15 @@ function pickViaFileInput(
     // 찍을 수 있어 multiple이 애초에 의미가 없으므로, capture일 때는 항상 false로 둔다.
     input.multiple = capture ? false : max > 1
     if (capture) input.capture = capture
-    input.style.display = 'none'
+    // display:none은 일부 WebView의 onShowFileChooser 구현이 "화면에 없는(렌더링 안 된)"
+    // 엘리먼트로 보고 선택창 자체를 띄우지 않는 경우가 있다. 레이아웃에는 참여하되
+    // 화면에는 안 보이게(위치만 밀어내고 크기 0) 해서 그런 구현에서도 안전하게 한다.
+    input.style.position = 'fixed'
+    input.style.top = '-9999px'
+    input.style.left = '-9999px'
+    input.style.width = '0'
+    input.style.height = '0'
+    input.style.opacity = '0'
 
     let settled = false
 
